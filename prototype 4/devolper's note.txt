@@ -1,0 +1,6 @@
+Made enemy shoot 3 slow bullets instead of 1 fast bullet to make it more bullet hellish.
+
+gray balls can block a bullet
+
+can play fast pace by spamming shots
+or can play meticulously trying hit enemies with less shots

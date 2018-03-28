@@ -11,31 +11,65 @@ public class BulletControl : MonoBehaviour {
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        setType("white");
     }
-    void Start () {
-        set_type("white");
+    void Start()
+    {
+        if(type == "black")
+        {
+            move_speed = 5f;
+        }
+        else
+        {
+            move_speed = 10f;
+        }
+        rb.velocity = rb.velocity.normalized * move_speed;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
 	}
 
     void OnTriggerEnter2D(Collider2D col)
     {
        // Debug.Log("collide");
-        if ((type == "black") && (col.gameObject.tag == "Player"))
+        if ((type == "black"))
         {
-            Debug.Log("hit player");
-        }else if ((type == "white") && (col.gameObject.tag == "enemy"))
+            if((col.gameObject.tag == "Player"))
+            {
+                Destroy(gameObject);
+                GameManager.instance.gameOver();
+                Debug.Log("Gameover");
+            }
+            else if(col.gameObject.tag == "enemy")
+            {
+                EnemyControl enemy_script = col.gameObject.GetComponent<EnemyControl>();
+                if (enemy_script.type == "gray")
+                {
+                    enemy_script.setType("black");
+                    enemy_script.last_shot_time = Time.time;
+                    Destroy(gameObject);
+                }
+            }else if(col.gameObject.tag != "bullet")
+            {
+                Destroy(gameObject);
+            }
+        }else if (type == "white")
         {
-            Destroy(col.gameObject);
-            Debug.Log("hit enemy");
+            if(col.gameObject.tag == "enemy")
+            {
+                if(col.gameObject.GetComponent<EnemyControl>().type == "black")
+                {
+                    Destroy(col.gameObject);
+                    GameManager.instance.gainScore(10);
+                }
+                Destroy(gameObject);
+            }
         }
-        if(col.gameObject.tag == "wall")
+        if(col.gameObject.tag == "wall" && type == "white")
         {
             Destroy(gameObject);
             Instantiate(enemy, transform.position, Quaternion.identity);
-            Debug.Log("hit wall");
         }
     }
     public void set_direction(Vector2 dir)
@@ -43,7 +77,7 @@ public class BulletControl : MonoBehaviour {
         rb.velocity = dir * move_speed;
     }
 
-    public void set_type(string new_type)
+    public void setType(string new_type)
     {
         SpriteRenderer my_sprite = GetComponent<SpriteRenderer>();
         if (new_type == "white")
